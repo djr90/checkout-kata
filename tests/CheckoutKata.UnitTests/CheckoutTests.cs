@@ -150,17 +150,61 @@ public class CheckoutTests
     }
 
     [Fact]
-    public void GetTotalPrice_WhenOfferCostsMoreThanUnitPrice_StillChargesOfferPrice()
+    public void GetTotalPrice_WhenOfferCostsMoreThanUnitPrice_ChargesTheCheaperUnitTotal()
     {
-        // Pins the deliberate "trust the data" stance: offers are applied blindly even
-        // when the special price is worse than buying individually (risk #1 in the plan).
+        // An offer is a discount: it may never cost the customer more than buying the
+        // items individually. A misconfigured "3 for 200" on a £50 item still charges 150.
         var sut = new Checkout([new PricingRule("A", 50, new MultiBuyOffer(3, 200))]);
 
         sut.Scan("A");
         sut.Scan("A");
         sut.Scan("A");
 
-        sut.GetTotalPrice().Should().Be(200); // not 150
+        sut.GetTotalPrice().Should().Be(150); // capped at 3 × unit price, not 200
+    }
+
+    [Fact]
+    public void Scan_WhenSkuHasSurroundingWhitespace_MatchesTrimmedRule()
+    {
+        // Arrange — SKUs are trimmed consistently at construction and at scan time.
+        var sut = new Checkout(StandardPricing.Rules());
+
+        // Act
+        var result = sut.Scan(" A ");
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        sut.GetTotalPrice().Should().Be(50);
+    }
+
+    [Fact]
+    public void GetTotalPrice_WhenSingleLineOverflows_Throws()
+    {
+        // A single line (quantity × unitPrice) overflows the checked int and throws loudly
+        // rather than silently wrapping to a negative total.
+        var sut = new Checkout([new PricingRule("A", int.MaxValue)]);
+        sut.Scan("A");
+        sut.Scan("A");
+
+        Action act = () => sut.GetTotalPrice();
+
+        act.Should().Throw<OverflowException>();
+    }
+
+    [Fact]
+    public void GetTotalPrice_WhenSumOfLinesOverflows_Throws()
+    {
+        // Each line fits in an int, but their sum does not: the checked accumulation throws.
+        var sut = new Checkout([
+            new PricingRule("A", int.MaxValue),
+            new PricingRule("B", int.MaxValue),
+        ]);
+        sut.Scan("A");
+        sut.Scan("B");
+
+        Action act = () => sut.GetTotalPrice();
+
+        act.Should().Throw<OverflowException>();
     }
 
     [Fact]

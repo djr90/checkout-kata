@@ -8,6 +8,6 @@ namespace CheckoutKata;
 /// </summary>
 public sealed record PricingRule(string Sku, int UnitPrice, IOffer? Offer = null)
 {
-    public string Sku { get; } = Guard.Against.NullOrWhiteSpace(Sku);
+    public string Sku { get; } = Guard.Against.NullOrWhiteSpace(Sku).Trim();
     public int UnitPrice { get; } = Guard.Against.Negative(UnitPrice);
 }

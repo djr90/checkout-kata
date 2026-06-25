@@ -21,12 +21,15 @@ public sealed class Checkout : ICheckout
             return Result.Invalid(new ValidationError("A SKU must be provided."));
         }
 
-        if (!_rules.ContainsKey(sku))
+        // SKUs are byte-exact identifiers; trim surrounding whitespace so a stray space
+        // can't create a phantom miss against a rule keyed on the same (trimmed) SKU.
+        var key = sku.Trim();
+        if (!_rules.ContainsKey(key))
         {
-            return Result.NotFound($"No pricing rule for SKU '{sku}'.");
+            return Result.NotFound($"No pricing rule for SKU '{key}'.");
         }
 
-        _counts[sku] = _counts.GetValueOrDefault(sku) + 1;
+        _counts[key] = _counts.GetValueOrDefault(key) + 1;
         return Result.Success();
     }
 
@@ -36,8 +39,10 @@ public sealed class Checkout : ICheckout
         foreach (var (sku, quantity) in _counts)
         {
             var rule = _rules[sku];
-            total +=
-                rule.Offer?.CalculatePrice(quantity, rule.UnitPrice) ?? (quantity * rule.UnitPrice);
+            var line =
+                rule.Offer?.CalculatePrice(quantity, rule.UnitPrice)
+                ?? checked(quantity * rule.UnitPrice);
+            total = checked(total + line);
         }
 
         return total;
