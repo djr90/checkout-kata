@@ -1,0 +1,23 @@
+<Project>
+
+  <!-- Central Package Management: every package version is pinned here once. -->
+  <ItemGroup>
+    <!-- Production (CheckoutKata) -->
+    <PackageVersion Include="Ardalis.Result" Version="10.1.0" />
+    <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Test infrastructure -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
+    <PackageVersion Include="AutoFixture" Version="4.18.1" />
+    <PackageVersion Include="AutoFixture.Xunit2" Version="4.18.1" />
+    <PackageVersion Include="CsCheck" Version="4.4.1" />
+    <PackageVersion Include="Reqnroll.xUnit" Version="2.4.1" />
+  </ItemGroup>
+
+</Project>

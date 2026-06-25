@@ -1,0 +1,27 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{cs,csx}]
+indent_size = 4
+
+[*.{csproj,props,targets,config,json,yml,yaml}]
+indent_size = 2
+
+[*.cs]
+# File-scoped namespaces and modern C# conventions.
+csharp_style_namespace_declarations = file_scoped:error
+dotnet_sort_system_directives_first = true
+csharp_using_directive_placement = outside_namespace:error
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:error
+
+# ADR-035: treat all .NET code-style analyzer warnings as build errors.
+dotnet_analyzer_diagnostic.category-Style.severity = error
+dotnet_analyzer_diagnostic.category-Design.severity = error
+dotnet_analyzer_diagnostic.category-Usage.severity = error
+dotnet_analyzer_diagnostic.category-Naming.severity = error
