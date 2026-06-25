@@ -3,7 +3,6 @@
     <Project Path="src/CheckoutKata/CheckoutKata.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/CheckoutKata.AcceptanceTests/CheckoutKata.AcceptanceTests.csproj" />
     <Project Path="tests/CheckoutKata.UnitTests/CheckoutKata.UnitTests.csproj" />
   </Folder>
 </Solution>
