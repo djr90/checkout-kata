@@ -17,11 +17,22 @@ design record and change log — it is the authoritative description of *what wa
 - **Offers are a per-SKU strategy (`IOffer`).** New per-SKU offer types (e.g. %-off) can be added
   without touching `Checkout`. Cross-SKU promotions ("one X free per ten Y") deliberately aren't
   modelled — they need a basket-level discount pipeline, which is out of scope here.
-- **Offers are applied as authored ("trust the data").** `MultiBuyOffer` charges the special price
-  whenever the threshold is met; it does not check the offer is cheaper than buying individually.
-  A pinning test documents this.
-- **Money is `int` whole units.** No fractional pricing or currency; a `Money` value object would
-  be the first refactor if rounding/currency were introduced.
+- **Offers never overcharge.** `MultiBuyOffer` applies the special price per completed group, then
+  caps the line at `quantity × unitPrice` (`Math.Min`). A misconfigured offer that is dearer than
+  buying individually (e.g. "3 for 200" on a £50 item) charges the cheaper unit total (150), never
+  the offer price. A pinning test documents this. Correctly-configured discounts are unaffected —
+  the cap only bites when the offer is a bad deal.
+- **`MultiBuyOffer` requires `quantity >= 2`.** A "multi-buy of one" is just a unit price and almost
+  always a configuration mistake, so it is rejected at construction (`Guard.Against.OutOfRange`)
+  rather than silently repricing every unit.
+- **Money is `int` whole units, with `checked` arithmetic.** No fractional pricing or currency; a
+  `Money` value object would be the first refactor if rounding/currency were introduced. Totals and
+  offer arithmetic are `checked`, so an absurd basket throws `OverflowException` rather than silently
+  wrapping to a negative total. This is robustness insurance, not a realistic path — see the
+  overflow note below.
+- **SKUs are trimmed, then matched byte-exact.** Surrounding whitespace is trimmed consistently at
+  construction (`PricingRule`) and at scan time (`Checkout.Scan`), so `" A "` matches a rule keyed
+  on `"A"`. Beyond trimming, matching is exact (see the case-sensitivity note below).
 - **`Checkout` is single-transaction state.** Stateful, not thread-safe, no reset — one instance
   per transaction. `GetTotalPrice()` is a repeatable, side-effect-free read.
 
@@ -32,8 +43,23 @@ Built test-first (TDD). Two complementary layers:
 - **Unit** (xUnit + AwesomeAssertions) — pricing scenarios with hardcoded expected totals
   (130/180/260/95, B 30/45/75), scan result paths, case-sensitivity, and construction guards.
 - **Property** (CsCheck) — `total ≥ 0` and order-independence across arbitrary valid rule sets and
-  scan sequences. Monotonicity is intentionally *not* a property: a generous offer can make more
-  items cost less, which is the deliberate "trust the data" stance.
+  scan sequences. Generators are bounded well clear of `int.MaxValue` so they never overflow; the
+  `checked`-overflow edge is pinned by dedicated unit tests instead.
+- **Mutation** (Stryker.NET) — `dotnet stryker` (config in `stryker-config.json`) mutates the
+  production code and re-runs the suite to confirm assertions are load-bearing. Current score
+  **87.5%**; the surviving mutants are a redundant null guard (LINQ's `ToDictionary` already throws
+  `ArgumentNullException`) and two human-readable error-message strings we deliberately don't pin.
+  Wired into CI as a **non-blocking** report (artifact upload); promote to a required gate once the
+  score is stable.
+
+Monotonicity is intentionally *not* a property — in **either** direction:
+
+- *Monotonic in quantity* fails because a generous offer can make more items cost less.
+- *Monotonic when adding an item* fails for the same reason: the "never overcharge" cap floors each
+  line at `quantity × unitPrice`, but a generous special (e.g. "2 for 0") makes the item that
+  *completes* a group cheaper than the partial group, so the total can drop. An early version of
+  the metamorphic test asserted this and rightly failed; it was removed and the reasoning recorded
+  in the property-test file.
 
 ## Review-driven changes
 
@@ -60,6 +86,26 @@ the same engineer who wrote the unit tests — and it **duplicated** cases alrea
 unit theory (`AAA=130`, `AAAA=180`, `AAAAAA=260`, `AAABBCD=210`, `BAB=95`, and the unknown-SKU
 result path). It was the least load-bearing layer in the repo, so it was cut.
 
+### 3. QE review follow-ups
+
+A senior-QE pass against the brief drove the following changes (no functional pricing bug was found;
+these harden behaviour and tighten the tests):
+
+- **Offers can no longer overcharge** — replaced the "trust the data" stance with a `Math.Min` cap
+  at the unit-price total. The pinning test now asserts `150`, not `200`.
+- **`checked` arithmetic** on totals and offer lines, so overflow throws instead of wrapping. This
+  was prompted by noticing the never-negative property test could not actually reach the only
+  scenario (signed overflow) that would violate it.
+- **`MultiBuyOffer` rejects `quantity < 2`**; **SKUs are trimmed** consistently at construction and
+  scan time.
+- **Property generators widened** (prices/counts) to traverse realistic magnitudes, kept clear of
+  the overflow edge.
+- **Mutation testing (Stryker.NET) added.** The first run scored 75% and flagged that two of three
+  `checked` sites were unpinned; targeted overflow tests took the score to 87.5%. Remaining
+  survivors are benign (redundant null guard, unpinned message strings).
+- **Metamorphic "adding an item never lowers the total" was attempted and rejected** — it is false
+  by design under generous offers (documented above and in the property-test file).
+
 ## Decisions made explicit
 
 These were already correct and tested; recorded here so the reasoning is on the record.
@@ -70,9 +116,17 @@ These were already correct and tested; recorded here so the reasoning is on the 
   If SKUs were ever user-entered, switching the backing dictionary to
   `StringComparer.OrdinalIgnoreCase` would be the one-line change.
 
-- **Totals accumulate in `int`.** Realistic baskets are nowhere near `int.MaxValue`, so overflow is
-  deliberately not guarded. A `Money` / `long` value object would be the home for that if fractional
-  pricing, currency, or absurd quantities ever entered scope.
+- **Totals accumulate in `checked int`.** Realistic baskets are nowhere near `int.MaxValue`, so
+  overflow is not a live risk — but the arithmetic is `checked` so the impossible-in-practice case
+  fails loudly (`OverflowException`) instead of wrapping to a negative total. Pinned by unit tests
+  covering a single oversized line, the sum of multiple lines, and both `MultiBuyOffer` sites. A
+  `Money` / `long` value object would be the home for true large-magnitude or fractional pricing.
+
+- **Deferred: `Money` value object and cross-SKU promotions.** Neither is built. The kata is
+  whole-pound, single-SKU offers, so a `Money` type (currency, rounding) and a basket-level discount
+  pipeline ("one X free per ten Y") would be speculative. **Revisit when** currency, fractional
+  pricing, or a genuine cross-SKU offer enters scope; the `IOffer` seam is where a per-SKU extension
+  lands, and a basket-level pipeline would sit above it.
 
 - **Proportionality.** The property tests, central package management, and ADR references are
   intentionally heavier than a four-SKU kata strictly needs — they exist to show how a real service
