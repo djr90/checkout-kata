@@ -1,3 +1,5 @@
+using Ardalis.GuardClauses;
+
 namespace CheckoutKata.Offers;
 
 /// <summary>
@@ -6,7 +8,19 @@ namespace CheckoutKata.Offers;
 /// </summary>
 public sealed class MultiBuyOffer : IOffer
 {
-    public MultiBuyOffer(int quantity, int specialPrice) => throw new NotImplementedException();
+    private readonly int _quantity;
+    private readonly int _specialPrice;
 
-    public int CalculatePrice(int quantity, int unitPrice) => throw new NotImplementedException();
+    public MultiBuyOffer(int quantity, int specialPrice)
+    {
+        _quantity = Guard.Against.NegativeOrZero(quantity);
+        _specialPrice = Guard.Against.Negative(specialPrice);
+    }
+
+    public int CalculatePrice(int quantity, int unitPrice)
+    {
+        var offers = quantity / _quantity;
+        var remainder = quantity % _quantity;
+        return (offers * _specialPrice) + (remainder * unitPrice);
+    }
 }
