@@ -1,5 +1,4 @@
 <Project>
-
   <!--
     Shared build settings inherited by every project in the solution (DRY).
     Per-project files stay minimal and only declare what is unique to them.
@@ -22,5 +21,4 @@
     <!-- Central Package Management. -->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
 </Project>

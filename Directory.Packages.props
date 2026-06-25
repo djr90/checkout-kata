@@ -1,5 +1,4 @@
 <Project>
-
   <!-- Central Package Management: every package version is pinned here once. -->
   <ItemGroup>
     <!-- Production (CheckoutKata) -->
@@ -19,5 +18,4 @@
     <PackageVersion Include="CsCheck" Version="4.4.1" />
     <PackageVersion Include="Reqnroll.xUnit" Version="2.4.1" />
   </ItemGroup>
-
 </Project>
