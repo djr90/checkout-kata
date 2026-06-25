@@ -14,7 +14,11 @@ public sealed class Checkout : ICheckout
         _rules = pricingRules.ToDictionary(rule => rule.Sku);
     }
 
-    public Result Scan(string sku) => throw new NotImplementedException();
+    public Result Scan(string sku)
+    {
+        _counts[sku] = _counts.GetValueOrDefault(sku) + 1;
+        return Result.Success();
+    }
 
     public int GetTotalPrice()
     {
