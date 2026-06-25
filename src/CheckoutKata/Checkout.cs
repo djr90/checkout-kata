@@ -25,7 +25,9 @@ public sealed class Checkout : ICheckout
         var total = 0;
         foreach (var (sku, quantity) in _counts)
         {
-            total += quantity * _rules[sku].UnitPrice;
+            var rule = _rules[sku];
+            total +=
+                rule.Offer?.CalculatePrice(quantity, rule.UnitPrice) ?? (quantity * rule.UnitPrice);
         }
 
         return total;
