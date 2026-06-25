@@ -16,6 +16,16 @@ public sealed class Checkout : ICheckout
 
     public Result Scan(string sku)
     {
+        if (string.IsNullOrWhiteSpace(sku))
+        {
+            return Result.Invalid(new ValidationError("A SKU must be provided."));
+        }
+
+        if (!_rules.ContainsKey(sku))
+        {
+            return Result.NotFound($"No pricing rule for SKU '{sku}'.");
+        }
+
         _counts[sku] = _counts.GetValueOrDefault(sku) + 1;
         return Result.Success();
     }
