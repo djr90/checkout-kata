@@ -18,6 +18,10 @@
     <!-- Reproducible, deterministic output. -->
     <Deterministic>true</Deterministic>
 
+    <!-- Enable IDE0005 (unused usings) on build; don't force XML docs on every public member. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
     <!-- Central Package Management. -->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>

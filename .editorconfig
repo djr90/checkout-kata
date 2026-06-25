@@ -25,3 +25,27 @@ dotnet_analyzer_diagnostic.category-Style.severity = error
 dotnet_analyzer_diagnostic.category-Design.severity = error
 dotnet_analyzer_diagnostic.category-Usage.severity = error
 dotnet_analyzer_diagnostic.category-Naming.severity = error
+
+# Taste-based rules that are layout/preference only — CSharpier owns layout, and
+# block-vs-expression body / primary-constructor are not correctness concerns.
+# Kept non-blocking deliberately (the ".editorconfig evaluation" ADR-035 calls for).
+dotnet_diagnostic.IDE0021.severity = silent   # use block body for constructor
+dotnet_diagnostic.IDE0022.severity = silent   # use block body for method
+dotnet_diagnostic.IDE0023.severity = silent   # use block body for conversion operator
+dotnet_diagnostic.IDE0024.severity = silent   # use block body for operator
+dotnet_diagnostic.IDE0025.severity = silent   # use expression body for property
+dotnet_diagnostic.IDE0027.severity = silent   # use expression body for accessor
+dotnet_diagnostic.IDE0290.severity = silent   # use primary constructor
+
+# `var` vs explicit type is a team style choice, not a correctness concern — allow both.
+dotnet_diagnostic.IDE0007.severity = silent   # use var
+dotnet_diagnostic.IDE0008.severity = silent   # use explicit type
+
+[tests/**/*.cs]
+# Test projects follow the Phoenix unit-test naming convention
+# ({Method}_When{Condition}_Then{Result}), which CA1707 forbids — relax it here only.
+dotnet_diagnostic.CA1707.severity = none
+# Fluent assertions (AwesomeAssertions) intentionally discard their chained return value.
+dotnet_diagnostic.IDE0058.severity = none
+# Test classes are public xUnit fixtures by design.
+dotnet_diagnostic.CA1515.severity = none
