@@ -1,4 +1,17 @@
 # checkout-kata
+
+The classic supermarket checkout kata, deliberately grown into a small
+**clean-architecture showcase**: a Domain/Application split, a stateless pricing
+service, architecture tests that enforce the layering, and .NET Aspire
+orchestration — while keeping the original hardening (Result pattern, guard
+clauses, checked arithmetic, a never-overcharge cap, property + mutation tests).
+
+> This is intentionally more than a 4-SKU kata needs. It demonstrates "what a
+> real service would look like." The reasoning — and where ceremony was
+> deliberately *not* added — is recorded in [ENGINEERING-NOTES.md](ENGINEERING-NOTES.md).
+
+## The kata
+
 In a normal supermarket, products are identified using Stock Keeping Units, or SKUs. In our supermarket, we’ll use individual letters of the alphabet (A, B, C, and so on). Our goods are priced individually. In addition, some items are multipriced: buy _n_ of them, and they’ll cost you _y_. For example, item ‘A’ might cost 50 pounds individually, but this week we have a special offer; buy three ‘A’s and they’ll cost you 130. The current pricing and offers are as follows:
 
 | SKU  | Unit Price | Special Price |
@@ -17,6 +30,95 @@ interface ICheckout
     void Scan(string item);
     int GetTotalPrice();
 }
+```
+
+> In this implementation `Scan` returns a `Result` (Success / NotFound / Invalid)
+> rather than `void`, so a caller can't silently drop an unknown SKU — see ADR-001
+> in the engineering notes.
+
+## Architecture
+
+Dependencies point inwards: the domain depends on nothing but guard clauses, and
+the outer layers depend on the inner ones — never the reverse. The architecture
+tests make this executable.
+
+```mermaid
+flowchart TD
+    AppHost["CheckoutKata.AppHost<br/>(Aspire orchestrator)"] --> Api
+    Api["CheckoutKata.Api<br/>(minimal API)"] --> App
+    Api --> SD["CheckoutKata.ServiceDefaults<br/>(OTel · health · resilience)"]
+    App["CheckoutKata.Application<br/>(Checkout · PricingService)"] --> Domain
+    Domain["CheckoutKata.Domain<br/>(Sku · PricingRule · Offers)"]
+```
+
+| Project | Responsibility | Depends on |
+| --- | --- | --- |
+| `CheckoutKata.Domain` | `Sku`, `PricingRule`, `IOffer` + offers | `Ardalis.GuardClauses` only |
+| `CheckoutKata.Application` | `Checkout` (scan state), `PricingService` (totals) | Domain, `Ardalis.Result` |
+| `CheckoutKata.Api` | minimal API (`POST /checkout/total`) | Application, Domain, ServiceDefaults |
+| `CheckoutKata.ServiceDefaults` | Aspire defaults: OTel, health, resilience | — |
+| `CheckoutKata.AppHost` | Aspire orchestrator | Api |
+
+## Usage
+
+```csharp
+using CheckoutKata.Application;
+using CheckoutKata.Domain;
+using CheckoutKata.Domain.Offers;
+
+// 1. Define the catalog. Offers plug in behind IOffer (MultiBuyOffer, BuyXGetYFreeOffer, ...).
+PricingRule[] rules =
+[
+    new("A", 50, new MultiBuyOffer(quantity: 3, specialPrice: 130)),
+    new("B", 30, new MultiBuyOffer(quantity: 2, specialPrice: 45)),
+    new("C", 20),
+    new("D", 15),
+];
+
+// 2. Scan items in any order. Scan returns a Result you should inspect.
+var checkout = new Checkout(rules);
+checkout.Scan("B");
+checkout.Scan("A");
+checkout.Scan("B");
+
+int total = checkout.GetTotalPrice(); // 95
+
+// Or price a whole basket statelessly via the pricing engine directly:
+var pricing = new PricingService(rules);
+int basketTotal = pricing.CalculateTotal(new Dictionary<Sku, int> { ["A"] = 3 }); // 130
+```
+
+## Running the service
+
+Launch everything through the Aspire AppHost (starts the dashboard and the API):
+
+```bash
+dotnet run --project src/CheckoutKata.AppHost
+```
+
+The dashboard prints the `checkout-api` endpoint. Hit the stateless pricing endpoint
+(the whole basket goes in one request):
+
+```bash
+curl -X POST http://localhost:<port>/checkout/total \
+  -H "Content-Type: application/json" \
+  -d '{"items":{"B":2,"A":1}}'
+# {"total":95}
+```
+
+To run the API on its own (without Aspire) it listens on `http://localhost:5080`:
+
+```bash
+dotnet run --project src/CheckoutKata.Api
+```
+
+## Testing
+
+```bash
+dotnet test                                      # unit + property + architecture tests
+dotnet stryker -f stryker-config.Domain.json     # mutation testing, per project
+dotnet stryker -f stryker-config.Application.json
+dotnet csharpier check .                          # formatting
 ```
 
 # Instructions

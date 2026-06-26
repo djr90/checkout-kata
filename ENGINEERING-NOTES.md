@@ -36,6 +36,40 @@ design record and change log — it is the authoritative description of *what wa
 - **`Checkout` is single-transaction state.** Stateful, not thread-safe, no reset — one instance
   per transaction. `GetTotalPrice()` is a repeatable, side-effect-free read.
 
+## Architecture (deliberate showcase)
+
+These layers exist to demonstrate a production-shaped service. They are more than a four-SKU
+kata needs — see the **Proportionality** note at the end for where the line is drawn.
+
+- **Domain / Application split.** `CheckoutKata.Domain` holds the pure model (`Sku`, `PricingRule`,
+  `IOffer` and its offers) and depends on nothing but `Ardalis.GuardClauses`.
+  `CheckoutKata.Application` holds orchestration (`Checkout`, `PricingService`) and depends on Domain
+  plus `Ardalis.Result`. **Two layers, not four** — there is no persistence to warrant a Data layer,
+  and the API is the only presentation.
+- **Stateless `PricingService` (SRP split).** `Checkout` owns the per-transaction scan *counts*;
+  `PricingService` (sealed, injected via `IPricingService`) owns turning a SKU→quantity map into a
+  *total*. The pricing engine is independently testable and thread-safe, and the same engine prices a
+  whole basket for the stateless API endpoint. `Checkout` keeps a convenience constructor that wires
+  the default engine, so existing call sites are unaffected.
+- **`BuyXGetYFreeOffer` proves the open/closed seam.** A second `IOffer` (pay for X per full X+Y
+  group) drops in with no change to `Checkout` or `PricingService`, reusing the same `checked`
+  arithmetic. It is inherently never-overcharge (paid items ≤ quantity).
+- **Architecture tests make the boundary executable.** `CheckoutKata.ArchitectureTests`
+  (`NetArchTest.eNhancedEdition` — the maintained fork; the original `NetArchTest.Rules` is
+  unmaintained and not net10-ready) asserts the domain depends on neither the application, the outer
+  API/host/Aspire layers, nor the Result pattern, and that offers/services are sealed and
+  conventionally named (`*Offer` / `*Service`). In a clean two-project DAG the compiler already
+  forbids the reverse *project* reference, so the real teeth are the naming/sealing/type-leak rules —
+  verified to fail when violated. They run in `dotnet test`, so they gate CI.
+- **.NET Aspire orchestration.** `CheckoutKata.ServiceDefaults` (generated) adds OpenTelemetry,
+  `/health` + `/alive`, and HTTP resilience; `CheckoutKata.AppHost` orchestrates the API. Aspire 13
+  on .NET 10 is SDK/NuGet-based (`Aspire.AppHost.Sdk`) — no `dotnet workload install`. The AppHost
+  **builds** in CI but is never **run** there. Generated host/infra code follows framework idioms
+  (fluent-chain discards, the `Microsoft.Extensions.Hosting` namespace), so the strict `[*.cs]`
+  analyzer rules are relaxed for those projects only; `TreatWarningsAsErrors` — including the NU1902
+  security audit, which forced the OpenTelemetry (1.16.0) and Aspire SDK (13.4.6) version bumps —
+  still holds everywhere.
+
 ## Test strategy
 
 Built test-first (TDD). Two complementary layers:
@@ -135,8 +169,11 @@ These were already correct and tested; recorded here so the reasoning is on the 
   pricing, or a genuine cross-SKU offer enters scope; the `IOffer` seam is where a per-SKU extension
   lands, and a basket-level pipeline would sit above it.
 
-- **Proportionality.** The property tests, central package management, and ADR references are
-  intentionally heavier than a four-SKU kata strictly needs — they exist to show how a real service
-  would be set up. For a genuinely small internal tool I would keep the `IOffer` seam, the guard
-  clauses, and the unit tests, and add the heavier layers only once complexity justified them.
-  (Removing the BDD layer above is a first step in that direction.)
+- **Proportionality.** The Domain/Application split, architecture tests, Aspire orchestration,
+  property tests, central package management, and ADR references are all intentionally heavier than a
+  four-SKU kata strictly needs — they exist to show how a real service would be set up, not to claim
+  a kata requires them. For a genuinely small internal tool I would keep the `IOffer` seam, the guard
+  clauses, and the unit tests, and add the layering, arch tests, and host only once complexity
+  justified them. The restraint is visible even here: **two** core projects rather than four, no Data
+  layer, and no cross-SKU offer pipeline. (Removing the BDD layer above was a first step in that
+  same direction.)
