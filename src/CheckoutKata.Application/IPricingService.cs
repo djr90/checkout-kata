@@ -1,3 +1,5 @@
+using CheckoutKata.Domain;
+
 namespace CheckoutKata.Application;
 
 /// <summary>
@@ -7,12 +9,12 @@ namespace CheckoutKata.Application;
 /// </summary>
 public interface IPricingService
 {
-    /// <summary>True when the catalog has a pricing rule for the given (trimmed) SKU.</summary>
-    bool HasRule(string sku);
+    /// <summary>True when the catalog has a pricing rule for the given SKU.</summary>
+    bool HasRule(Sku sku);
 
     /// <summary>
     /// Total price for the given SKU → quantity map. Every key must be a known SKU
     /// (see <see cref="HasRule"/>). Order-independent; overflows throw rather than wrap.
     /// </summary>
-    int CalculateTotal(IReadOnlyDictionary<string, int> quantities);
+    int CalculateTotal(IReadOnlyDictionary<Sku, int> quantities);
 }

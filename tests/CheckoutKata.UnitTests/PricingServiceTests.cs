@@ -39,14 +39,14 @@ public class PricingServiceTests
     {
         var sut = new PricingService(StandardPricing.Rules());
 
-        sut.CalculateTotal(new Dictionary<string, int>()).Should().Be(0);
+        sut.CalculateTotal(new Dictionary<Sku, int>()).Should().Be(0);
     }
 
     [Fact]
     public void CalculateTotal_AppliesOffersAndSumsLines()
     {
         var sut = new PricingService(StandardPricing.Rules());
-        var quantities = new Dictionary<string, int>
+        var quantities = new Dictionary<Sku, int>
         {
             ["A"] = 3, // 3-for-130
             ["B"] = 2, // 2-for-45
@@ -73,7 +73,7 @@ public class PricingServiceTests
             new PricingRule("A", int.MaxValue),
             new PricingRule("B", int.MaxValue),
         ]);
-        var quantities = new Dictionary<string, int> { ["A"] = 1, ["B"] = 1 };
+        var quantities = new Dictionary<Sku, int> { ["A"] = 1, ["B"] = 1 };
 
         Action act = () => sut.CalculateTotal(quantities);
 

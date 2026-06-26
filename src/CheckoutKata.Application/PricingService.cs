@@ -5,7 +5,7 @@ namespace CheckoutKata.Application;
 /// <inheritdoc cref="IPricingService" />
 public sealed class PricingService : IPricingService
 {
-    private readonly IReadOnlyDictionary<string, PricingRule> _rules;
+    private readonly IReadOnlyDictionary<Sku, PricingRule> _rules;
 
     public PricingService(IEnumerable<PricingRule> pricingRules)
     {
@@ -15,9 +15,9 @@ public sealed class PricingService : IPricingService
         _rules = pricingRules.ToDictionary(rule => rule.Sku);
     }
 
-    public bool HasRule(string sku) => _rules.ContainsKey(sku);
+    public bool HasRule(Sku sku) => _rules.ContainsKey(sku);
 
-    public int CalculateTotal(IReadOnlyDictionary<string, int> quantities)
+    public int CalculateTotal(IReadOnlyDictionary<Sku, int> quantities)
     {
         ArgumentNullException.ThrowIfNull(quantities);
 

@@ -7,7 +7,7 @@ namespace CheckoutKata.Application;
 public sealed class Checkout : ICheckout
 {
     private readonly IPricingService _pricing;
-    private readonly Dictionary<string, int> _counts = [];
+    private readonly Dictionary<Sku, int> _counts = [];
 
     /// <summary>
     /// Convenience constructor: prices the given rules with the default
@@ -30,9 +30,9 @@ public sealed class Checkout : ICheckout
             return Result.Invalid(new ValidationError("A SKU must be provided."));
         }
 
-        // SKUs are byte-exact identifiers; trim surrounding whitespace so a stray space
-        // can't create a phantom miss against a rule keyed on the same (trimmed) SKU.
-        var key = sku.Trim();
+        // Sku normalises (trims) on construction so a stray space can't create a phantom
+        // miss against a rule keyed on the same SKU.
+        var key = new Sku(sku);
         if (!_pricing.HasRule(key))
         {
             return Result.NotFound($"No pricing rule for SKU '{key}'.");
