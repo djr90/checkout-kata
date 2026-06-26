@@ -42,9 +42,13 @@ internal static class CheckoutFeature
         return Results.Ok(new TotalResponse(pricing.CalculateTotal(quantities)));
     }
 
+    // Returns the first failing rule's message, or null when the line is valid.
     private static string? Validate(string rawSku, int quantity, IPricingService pricing) =>
-        string.IsNullOrWhiteSpace(rawSku) ? "SKU must not be blank."
-        : quantity < 0 ? "Quantity must not be negative."
-        : !pricing.HasRule(new Sku(rawSku)) ? "No pricing rule for this SKU."
-        : null;
+        rawSku switch
+        {
+            _ when string.IsNullOrWhiteSpace(rawSku) => "SKU must not be blank.",
+            _ when quantity < 0 => "Quantity must not be negative.",
+            _ when !pricing.HasRule(new Sku(rawSku)) => "No pricing rule for this SKU.",
+            _ => null,
+        };
 }
