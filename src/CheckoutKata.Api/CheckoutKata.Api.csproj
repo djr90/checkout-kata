@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\CheckoutKata.Domain\CheckoutKata.Domain.csproj" />
+    <ProjectReference Include="..\CheckoutKata.Application\CheckoutKata.Application.csproj" />
+    <ProjectReference Include="..\CheckoutKata.ServiceDefaults\CheckoutKata.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>
