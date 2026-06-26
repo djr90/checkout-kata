@@ -25,17 +25,26 @@ jobs:
       - name: Check formatting (CSharpier)
         run: dotnet csharpier check .
 
+      # Builds the whole solution, including the Aspire AppHost (which is built but never
+      # run in CI) and the Api.
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
+      # Runs every test project, including CheckoutKata.ArchitectureTests — so the
+      # clean-architecture layering rules are a blocking gate, not just a convention.
       - name: Test (with coverage)
         run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
 
       # Non-blocking for now: surfaces surviving mutants as a report without failing CI.
-      # Flip to a required gate once the score has been stable above the break threshold.
-      - name: Mutation testing (Stryker)
+      # One run per source project (Stryker mutates a single project per run).
+      # Flip to a required gate once the scores have been stable above the break threshold.
+      - name: Mutation testing — Domain (Stryker)
         continue-on-error: true
-        run: dotnet stryker
+        run: dotnet stryker -f stryker-config.Domain.json
+
+      - name: Mutation testing — Application (Stryker)
+        continue-on-error: true
+        run: dotnet stryker -f stryker-config.Application.json
 
       - name: Upload mutation report
         if: always()

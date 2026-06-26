@@ -45,11 +45,13 @@ Built test-first (TDD). Two complementary layers:
 - **Property** (CsCheck) — `total ≥ 0` and order-independence across arbitrary valid rule sets and
   scan sequences. Generators are bounded well clear of `int.MaxValue` so they never overflow; the
   `checked`-overflow edge is pinned by dedicated unit tests instead.
-- **Mutation** (Stryker.NET) — `dotnet stryker` (config in `stryker-config.json`) mutates the
-  production code and re-runs the suite to confirm assertions are load-bearing. Current score
-  **87.5%**; the surviving mutants are a redundant null guard (LINQ's `ToDictionary` already throws
-  `ArgumentNullException`) and two human-readable error-message strings we deliberately don't pin.
-  Wired into CI as a **non-blocking** report (artifact upload); promote to a required gate once the
+- **Mutation** (Stryker.NET) — Stryker mutates one project per run, so after the Domain/Application
+  split there is one config each (`stryker-config.Domain.json`, `stryker-config.Application.json`).
+  Current scores: **Domain 90%**, **Application 81%**, both above the **80%** break threshold. The
+  surviving mutants are the same benign categories as before — a redundant null guard (LINQ's
+  `ToDictionary` already throws `ArgumentNullException`) and two human-readable error-message strings
+  we deliberately don't pin. Wired into CI as a **non-blocking** report (artifact upload); promote to
+  a required gate once the
   score is stable.
 
 Monotonicity is intentionally *not* a property — in **either** direction:
@@ -101,8 +103,10 @@ these harden behaviour and tighten the tests):
 - **Property generators widened** (prices/counts) to traverse realistic magnitudes, kept clear of
   the overflow edge.
 - **Mutation testing (Stryker.NET) added.** The first run scored 75% and flagged that two of three
-  `checked` sites were unpinned; targeted overflow tests took the score to 87.5%. Remaining
-  survivors are benign (redundant null guard, unpinned message strings).
+  `checked` sites were unpinned; targeted overflow tests took the score to 87.5%. After the
+  Domain/Application split it runs per project (Domain 90%, Application 81%); a targeted test pins
+  the new `Checkout(IPricingService)` null guard. Remaining survivors are benign (redundant null
+  guard, unpinned message strings).
 - **Metamorphic "adding an item never lowers the total" was attempted and rejected** — it is false
   by design under generous offers (documented above and in the property-test file).
 

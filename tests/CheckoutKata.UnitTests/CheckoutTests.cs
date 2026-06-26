@@ -221,6 +221,16 @@ public class CheckoutTests
     }
 
     [Fact]
+    public void Constructor_WhenPricingServiceNull_Throws()
+    {
+        // Act — the injection constructor guards its dependency.
+        Action act = () => _ = new Checkout((IPricingService)null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
     public void Constructor_WhenDuplicateSku_Throws()
     {
         // Act
