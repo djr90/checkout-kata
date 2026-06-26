@@ -49,3 +49,13 @@ dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.IDE0058.severity = none
 # Test classes are public xUnit fixtures by design.
 dotnet_diagnostic.CA1515.severity = none
+
+[src/CheckoutKata.{Api,AppHost,ServiceDefaults}/**.cs]
+# Aspire / minimal-API scaffolding follows framework idioms that differ from the kata's
+# hand-written core. These relaxations apply ONLY to the host/infra projects; the strict
+# bar (and TreatWarningsAsErrors, incl. the NU1902 security audit) still holds everywhere else.
+# Fluent builder/endpoint chains intentionally discard their return value.
+dotnet_diagnostic.IDE0058.severity = none
+# ServiceDefaults lives in the Microsoft.Extensions.Hosting namespace by Aspire convention
+# (so AddServiceDefaults() is discoverable); this deliberately won't match the folder name.
+dotnet_diagnostic.IDE0130.severity = none
