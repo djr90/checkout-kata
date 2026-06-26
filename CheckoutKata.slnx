@@ -4,6 +4,7 @@
     <Project Path="src/CheckoutKata.Application/CheckoutKata.Application.csproj" />
     <Project Path="src/CheckoutKata.ServiceDefaults/CheckoutKata.ServiceDefaults.csproj" />
     <Project Path="src/CheckoutKata.Api/CheckoutKata.Api.csproj" />
+    <Project Path="src/CheckoutKata.AppHost/CheckoutKata.AppHost.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CheckoutKata.UnitTests/CheckoutKata.UnitTests.csproj" />

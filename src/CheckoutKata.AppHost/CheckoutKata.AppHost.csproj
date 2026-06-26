@@ -1,0 +1,11 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
+  <PropertyGroup>
+    <!-- TargetFramework / Nullable / ImplicitUsings come from Directory.Build.props. -->
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>815593b1-d962-4b05-8155-7c4f7f78988b</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CheckoutKata.Api\CheckoutKata.Api.csproj" />
+  </ItemGroup>
+</Project>
