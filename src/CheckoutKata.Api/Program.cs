@@ -4,23 +4,17 @@ using CheckoutKata.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Service defaults wire OpenTelemetry, health checks, resilience, and the shared
+// ProblemDetails error contract (registered here; the matching middleware is in MapDefaultEndpoints).
 builder.AddServiceDefaults();
-
-// RFC 9457 problem+json for every error response — including unhandled exceptions, which
-// become a generic 500 with no exception detail leaked to the caller (the detail is logged
-// server-side by the exception handler and carried on the trace instead).
-builder.Services.AddProblemDetails();
 
 // PricingService is stateless and thread-safe, so a singleton over a fixed catalog is ideal.
 builder.Services.AddSingleton<IPricingService>(_ => new PricingService(SampleCatalog.Rules()));
 
 var app = builder.Build();
 
-// Registered before the endpoints so it is the innermost exception handler and wins over the
-// development exception page (which would otherwise leak a stack trace).
-app.UseExceptionHandler();
-app.UseStatusCodePages();
-
+// Health endpoints + the shared exception handler (problem+json, no leaked detail). Called before
+// the app's own endpoints so the handler wraps them.
 app.MapDefaultEndpoints();
 
 // Stateless pricing: the whole basket arrives in one request and the total comes back.

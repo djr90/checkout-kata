@@ -24,6 +24,10 @@ public static class Extensions
 
         builder.AddDefaultHealthChecks();
 
+        // RFC 9457 problem+json for every error response. The matching middleware is wired in
+        // MapDefaultEndpoints, so any service using the defaults inherits the same error contract.
+        builder.Services.AddProblemDetails();
+
         builder.Services.AddServiceDiscovery();
 
         builder.Services.ConfigureHttpClientDefaults(http =>
@@ -117,6 +121,14 @@ public static class Extensions
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
+        // Shared error handling for every service. Unhandled exceptions become RFC 9457
+        // problem+json with no detail leaked to the caller — this explicit handler wins over the
+        // development exception page, which would otherwise return a stack trace. The exception is
+        // still logged server-side and the response carries a traceId. UseStatusCodePages gives
+        // bare status codes (e.g. 404) a problem+json body too. Call this before mapping endpoints.
+        app.UseExceptionHandler();
+        app.UseStatusCodePages();
+
         // Adding health checks endpoints to applications in non-development environments has security implications.
         // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
         if (app.Environment.IsDevelopment())
