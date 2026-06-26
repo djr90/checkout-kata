@@ -6,13 +6,21 @@ namespace CheckoutKata.Application;
 /// <inheritdoc cref="ICheckout" />
 public sealed class Checkout : ICheckout
 {
-    private readonly IReadOnlyDictionary<string, PricingRule> _rules;
+    private readonly IPricingService _pricing;
     private readonly Dictionary<string, int> _counts = [];
 
+    /// <summary>
+    /// Convenience constructor: prices the given rules with the default
+    /// <see cref="PricingService"/>.
+    /// </summary>
     public Checkout(IEnumerable<PricingRule> pricingRules)
+        : this(new PricingService(pricingRules)) { }
+
+    /// <summary>Records scanned items and delegates pricing to the supplied engine.</summary>
+    public Checkout(IPricingService pricingService)
     {
-        ArgumentNullException.ThrowIfNull(pricingRules);
-        _rules = pricingRules.ToDictionary(rule => rule.Sku);
+        ArgumentNullException.ThrowIfNull(pricingService);
+        _pricing = pricingService;
     }
 
     public Result Scan(string sku)
@@ -25,7 +33,7 @@ public sealed class Checkout : ICheckout
         // SKUs are byte-exact identifiers; trim surrounding whitespace so a stray space
         // can't create a phantom miss against a rule keyed on the same (trimmed) SKU.
         var key = sku.Trim();
-        if (!_rules.ContainsKey(key))
+        if (!_pricing.HasRule(key))
         {
             return Result.NotFound($"No pricing rule for SKU '{key}'.");
         }
@@ -34,18 +42,6 @@ public sealed class Checkout : ICheckout
         return Result.Success();
     }
 
-    public int GetTotalPrice()
-    {
-        var total = 0;
-        foreach (var (sku, quantity) in _counts)
-        {
-            var rule = _rules[sku];
-            var line =
-                rule.Offer?.CalculatePrice(quantity, rule.UnitPrice)
-                ?? checked(quantity * rule.UnitPrice);
-            total = checked(total + line);
-        }
-
-        return total;
-    }
+    // Counting is this class's job; turning counts into money is the pricing engine's.
+    public int GetTotalPrice() => _pricing.CalculateTotal(_counts);
 }

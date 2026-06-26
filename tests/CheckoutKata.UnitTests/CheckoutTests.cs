@@ -212,8 +212,8 @@ public class CheckoutTests
     [Fact]
     public void Constructor_WhenRulesNull_Throws()
     {
-        // Act
-        Action act = () => _ = new Checkout(null!);
+        // Act — disambiguate from the IPricingService overload; this guards the rules path.
+        Action act = () => _ = new Checkout((IEnumerable<PricingRule>)null!);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
