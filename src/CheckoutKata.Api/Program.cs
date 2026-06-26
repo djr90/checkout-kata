@@ -16,4 +16,4 @@ app.MapDefaultEndpoints();
 // Stateless pricing: the whole basket arrives in one request and the total comes back.
 app.MapCheckoutEndpoints();
 
-app.Run();
+await app.RunAsync();
