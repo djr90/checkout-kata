@@ -1,14 +1,11 @@
 using CheckoutKata.Api;
-using CheckoutKata.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Service defaults wire OpenTelemetry, health checks, resilience, and the shared
 // ProblemDetails error contract (registered here; the matching middleware is in MapDefaultEndpoints).
 builder.AddServiceDefaults();
-
-// PricingService is stateless and thread-safe, so a singleton over a fixed catalog is ideal.
-builder.Services.AddSingleton<IPricingService>(_ => new PricingService(SampleCatalog.Rules()));
+builder.Services.AddCheckout();
 
 var app = builder.Build();
 

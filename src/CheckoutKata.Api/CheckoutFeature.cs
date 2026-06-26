@@ -4,11 +4,16 @@ using CheckoutKata.Domain;
 namespace CheckoutKata.Api;
 
 /// <summary>
-/// The checkout HTTP surface. Keeps <c>Program.cs</c> to composition and isolates the
-/// transport↔domain adapter logic (parse, validate, map to <see cref="Sku"/>) in one testable place.
+/// The checkout feature: its service registration and HTTP surface. Keeps <c>Program.cs</c> to
+/// composition and isolates the transport↔domain adapter logic (parse, validate, map to
+/// <see cref="Sku"/>) in one testable place.
 /// </summary>
-internal static class CheckoutEndpoints
+internal static class CheckoutFeature
 {
+    public static IServiceCollection AddCheckout(this IServiceCollection services) =>
+        // PricingService is stateless and thread-safe, so a singleton over a fixed catalog is ideal.
+        services.AddSingleton<IPricingService>(_ => new PricingService(SampleCatalog.Rules()));
+
     public static IEndpointRouteBuilder MapCheckoutEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapPost("/checkout/total", PostTotal);
