@@ -1,11 +1,10 @@
 using Ardalis.Result;
 using AwesomeAssertions;
-using CheckoutKata.Application;
+using CheckoutKata.Application.UnitTests.TestData;
 using CheckoutKata.Domain;
 using CheckoutKata.Domain.Offers;
-using CheckoutKata.UnitTests.TestData;
 
-namespace CheckoutKata.UnitTests;
+namespace CheckoutKata.Application.UnitTests;
 
 public class CheckoutTests
 {
@@ -235,28 +234,6 @@ public class CheckoutTests
     {
         // Act
         Action act = () => _ = new Checkout([new PricingRule("A", 50), new PricingRule("A", 60)]);
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    public void PricingRule_WhenSkuBlank_Throws(string sku)
-    {
-        // Act
-        Action act = () => _ = new PricingRule(sku, 50);
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
-    }
-
-    [Fact]
-    public void PricingRule_WhenUnitPriceNegative_Throws()
-    {
-        // Act
-        Action act = () => _ = new PricingRule("A", -1);
 
         // Assert
         act.Should().Throw<ArgumentException>();

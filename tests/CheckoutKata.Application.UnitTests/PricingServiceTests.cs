@@ -1,9 +1,8 @@
 using AwesomeAssertions;
-using CheckoutKata.Application;
+using CheckoutKata.Application.UnitTests.TestData;
 using CheckoutKata.Domain;
-using CheckoutKata.UnitTests.TestData;
 
-namespace CheckoutKata.UnitTests;
+namespace CheckoutKata.Application.UnitTests;
 
 public class PricingServiceTests
 {

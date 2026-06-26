@@ -1,9 +1,8 @@
-using CheckoutKata.Application;
 using CheckoutKata.Domain;
 using CheckoutKata.Domain.Offers;
 using CsCheck;
 
-namespace CheckoutKata.UnitTests;
+namespace CheckoutKata.Application.UnitTests;
 
 /// <summary>
 /// Property-based checks over arbitrary (valid) rule sets and scan sequences.

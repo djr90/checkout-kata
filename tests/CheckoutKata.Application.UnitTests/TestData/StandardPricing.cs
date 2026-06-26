@@ -1,7 +1,7 @@
 using CheckoutKata.Domain;
 using CheckoutKata.Domain.Offers;
 
-namespace CheckoutKata.UnitTests.TestData;
+namespace CheckoutKata.Application.UnitTests.TestData;
 
 /// <summary>
 /// The canonical pricing rules from the kata README (A 50 / 3 for 130, B 30 / 2 for 45,

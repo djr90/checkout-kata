@@ -1,7 +1,6 @@
 using AwesomeAssertions;
-using CheckoutKata.Domain;
 
-namespace CheckoutKata.UnitTests;
+namespace CheckoutKata.Domain.UnitTests;
 
 public class SkuTests
 {

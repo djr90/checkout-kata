@@ -7,7 +7,8 @@
     <Project Path="src/CheckoutKata.AppHost/CheckoutKata.AppHost.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/CheckoutKata.UnitTests/CheckoutKata.UnitTests.csproj" />
+    <Project Path="tests/CheckoutKata.Domain.UnitTests/CheckoutKata.Domain.UnitTests.csproj" />
+    <Project Path="tests/CheckoutKata.Application.UnitTests/CheckoutKata.Application.UnitTests.csproj" />
     <Project Path="tests/CheckoutKata.ArchitectureTests/CheckoutKata.ArchitectureTests.csproj" />
   </Folder>
 </Solution>

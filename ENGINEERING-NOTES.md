@@ -72,7 +72,10 @@ kata needs — see the **Proportionality** note at the end for where the line is
 
 ## Test strategy
 
-Built test-first (TDD). Two complementary layers:
+Built test-first (TDD). The unit tests mirror the production layering — `CheckoutKata.Domain.UnitTests`
+(referencing the domain only, so it stays honest about isolation) and `CheckoutKata.Application.UnitTests`
+— which also lets each per-project Stryker run execute only its own layer's tests. Three complementary
+layers:
 
 - **Unit** (xUnit + AwesomeAssertions) — pricing scenarios with hardcoded expected totals
   (130/180/260/95, B 30/45/75), scan result paths, case-insensitive matching, and construction guards.
@@ -103,8 +106,8 @@ Monotonicity is intentionally *not* a property — in **either** direction:
 
 `AutoFixture` and `AutoFixture.Xunit2` were referenced by the unit-test project and pinned in
 `Directory.Packages.props`, but **nothing used them** — zero occurrences across the test code.
-Removed from `Directory.Packages.props` and
-`tests/CheckoutKata.UnitTests/CheckoutKata.UnitTests.csproj`.
+Removed from `Directory.Packages.props` and the unit-test project (since split into
+`CheckoutKata.Domain.UnitTests` and `CheckoutKata.Application.UnitTests`).
 
 Rationale: unused packages are needless dependency surface and contradict the project's
 dependency-light stance. The inputs here (single-letter SKUs, small integers) read more clearly

@@ -1,7 +1,7 @@
 using AwesomeAssertions;
 using CheckoutKata.Domain.Offers;
 
-namespace CheckoutKata.UnitTests.Offers;
+namespace CheckoutKata.Domain.UnitTests.Offers;
 
 public class MultiBuyOfferTests
 {

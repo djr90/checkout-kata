@@ -1,7 +1,9 @@
 {
   "stryker-config": {
     "project": "CheckoutKata.Domain.csproj",
-    "test-projects": ["tests/CheckoutKata.UnitTests/CheckoutKata.UnitTests.csproj"],
+    "test-projects": [
+      "tests/CheckoutKata.Domain.UnitTests/CheckoutKata.Domain.UnitTests.csproj"
+    ],
     "reporters": ["html", "progress"],
     "thresholds": {
       "high": 90,
