@@ -1,4 +1,5 @@
-using CheckoutKata.Offers;
+using CheckoutKata.Domain;
+using CheckoutKata.Domain.Offers;
 
 namespace CheckoutKata.UnitTests.TestData;
 

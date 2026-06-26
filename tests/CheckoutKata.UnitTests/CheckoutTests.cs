@@ -1,6 +1,8 @@
 using Ardalis.Result;
 using AwesomeAssertions;
-using CheckoutKata.Offers;
+using CheckoutKata.Application;
+using CheckoutKata.Domain;
+using CheckoutKata.Domain.Offers;
 using CheckoutKata.UnitTests.TestData;
 
 namespace CheckoutKata.UnitTests;

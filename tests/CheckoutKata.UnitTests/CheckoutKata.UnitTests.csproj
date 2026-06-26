@@ -14,7 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CheckoutKata\CheckoutKata.csproj" />
+    <ProjectReference Include="..\..\src\CheckoutKata.Domain\CheckoutKata.Domain.csproj" />
+    <ProjectReference Include="..\..\src\CheckoutKata.Application\CheckoutKata.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

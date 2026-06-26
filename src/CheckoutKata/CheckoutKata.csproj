@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <!-- Result pattern (ADR-001) and guard clauses. No web dependencies in the core. -->
-    <PackageReference Include="Ardalis.Result" />
-    <PackageReference Include="Ardalis.GuardClauses" />
-  </ItemGroup>
-</Project>

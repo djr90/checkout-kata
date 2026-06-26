@@ -1,6 +1,7 @@
 using Ardalis.Result;
+using CheckoutKata.Domain;
 
-namespace CheckoutKata;
+namespace CheckoutKata.Application;
 
 /// <inheritdoc cref="ICheckout" />
 public sealed class Checkout : ICheckout

@@ -1,4 +1,4 @@
-namespace CheckoutKata.Offers;
+namespace CheckoutKata.Domain.Offers;
 
 /// <summary>
 /// A pricing offer for a single SKU. Given how many units were scanned and the

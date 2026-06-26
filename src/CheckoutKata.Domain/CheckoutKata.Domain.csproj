@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <!-- Pure domain. Guard clauses only — no Result, no web, no other project. -->
+    <PackageReference Include="Ardalis.GuardClauses" />
+  </ItemGroup>
+</Project>

@@ -1,5 +1,5 @@
 using AwesomeAssertions;
-using CheckoutKata.Offers;
+using CheckoutKata.Domain.Offers;
 
 namespace CheckoutKata.UnitTests.Offers;
 

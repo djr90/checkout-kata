@@ -1,4 +1,6 @@
-using CheckoutKata.Offers;
+using CheckoutKata.Application;
+using CheckoutKata.Domain;
+using CheckoutKata.Domain.Offers;
 using CsCheck;
 
 namespace CheckoutKata.UnitTests;

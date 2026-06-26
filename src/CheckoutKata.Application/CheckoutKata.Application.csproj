@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <!-- Orchestration layer. Result pattern (ADR-001) lives here, not in the domain. -->
+    <PackageReference Include="Ardalis.Result" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CheckoutKata.Domain\CheckoutKata.Domain.csproj" />
+  </ItemGroup>
+</Project>

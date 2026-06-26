@@ -1,7 +1,7 @@
 using Ardalis.GuardClauses;
-using CheckoutKata.Offers;
+using CheckoutKata.Domain.Offers;
 
-namespace CheckoutKata;
+namespace CheckoutKata.Domain;
 
 /// <summary>
 /// Pricing for a single SKU: its unit price and an optional multi-buy <see cref="IOffer"/>.

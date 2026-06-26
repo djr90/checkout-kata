@@ -1,6 +1,6 @@
 using Ardalis.GuardClauses;
 
-namespace CheckoutKata.Offers;
+namespace CheckoutKata.Domain.Offers;
 
 /// <summary>
 /// A "buy <c>quantity</c> for <c>specialPrice</c>" offer (e.g. 3 for 130). Applies as

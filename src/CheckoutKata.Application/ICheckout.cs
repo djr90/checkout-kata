@@ -1,6 +1,6 @@
 using Ardalis.Result;
 
-namespace CheckoutKata;
+namespace CheckoutKata.Application;
 
 /// <summary>
 /// A single checkout transaction. Items are scanned one at a time in any order,
