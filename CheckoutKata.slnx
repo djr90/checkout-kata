@@ -10,5 +10,6 @@
     <Project Path="tests/CheckoutKata.Domain.UnitTests/CheckoutKata.Domain.UnitTests.csproj" />
     <Project Path="tests/CheckoutKata.Application.UnitTests/CheckoutKata.Application.UnitTests.csproj" />
     <Project Path="tests/CheckoutKata.ArchitectureTests/CheckoutKata.ArchitectureTests.csproj" />
+    <Project Path="tests/CheckoutKata.Api.IntegrationTests/CheckoutKata.Api.IntegrationTests.csproj" />
   </Folder>
 </Solution>

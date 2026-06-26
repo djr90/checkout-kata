@@ -14,6 +14,7 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
     <PackageVersion Include="CsCheck" Version="4.4.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.9" />
     <!-- Architecture tests. eNhancedEdition is the maintained fork (net10-ready); the original
          NetArchTest.Rules is effectively unmaintained. -->
     <PackageVersion Include="NetArchTest.eNhancedEdition" Version="1.4.5" />
