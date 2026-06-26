@@ -125,16 +125,17 @@ public class CheckoutTests
     }
 
     [Fact]
-    public void Scan_WhenSkuWrongCase_ReturnsNotFound()
+    public void Scan_WhenSkuDiffersOnlyByCase_MatchesRule()
     {
-        // Arrange — lookup is case-sensitive by design
+        // Arrange — SKUs are normalised (upper-cased), so "a" matches a rule keyed on "A".
         var sut = new Checkout(StandardPricing.Rules());
 
         // Act
         var result = sut.Scan("a");
 
         // Assert
-        result.Status.Should().Be(ResultStatus.NotFound);
+        result.IsSuccess.Should().BeTrue();
+        sut.GetTotalPrice().Should().Be(50);
     }
 
     [Fact]

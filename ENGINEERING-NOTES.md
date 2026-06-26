@@ -30,9 +30,9 @@ design record and change log — it is the authoritative description of *what wa
   offer arithmetic are `checked`, so an absurd basket throws `OverflowException` rather than silently
   wrapping to a negative total. This is robustness insurance, not a realistic path — see the
   overflow note below.
-- **SKUs are trimmed, then matched byte-exact.** Surrounding whitespace is trimmed consistently at
-  construction (`PricingRule`) and at scan time (`Checkout.Scan`), so `" A "` matches a rule keyed
-  on `"A"`. Beyond trimming, matching is exact (see the case-sensitivity note below).
+- **SKUs are a normalising `Sku` value object.** Null/blank is rejected; surrounding whitespace is
+  trimmed and the value is upper-cased, all in one place (`Sku`), so `" a "` matches a rule keyed
+  on `"A"` (see the case-insensitivity note below).
 - **`Checkout` is single-transaction state.** Stateful, not thread-safe, no reset — one instance
   per transaction. `GetTotalPrice()` is a repeatable, side-effect-free read.
 
@@ -41,7 +41,7 @@ design record and change log — it is the authoritative description of *what wa
 Built test-first (TDD). Two complementary layers:
 
 - **Unit** (xUnit + AwesomeAssertions) — pricing scenarios with hardcoded expected totals
-  (130/180/260/95, B 30/45/75), scan result paths, case-sensitivity, and construction guards.
+  (130/180/260/95, B 30/45/75), scan result paths, case-insensitive matching, and construction guards.
 - **Property** (CsCheck) — `total ≥ 0` and order-independence across arbitrary valid rule sets and
   scan sequences. Generators are bounded well clear of `int.MaxValue` so they never overflow; the
   `checked`-overflow edge is pinned by dedicated unit tests instead.
@@ -110,11 +110,14 @@ these harden behaviour and tighten the tests):
 
 These were already correct and tested; recorded here so the reasoning is on the record.
 
-- **SKU lookup is case-sensitive.** SKUs are exact machine identifiers (barcodes / product codes),
-  not user-typed free text, so `a` and `A` are legitimately different keys. Case-folding would risk
-  silently merging distinct products. Pinned by the `Scan_WhenSkuWrongCase_ReturnsNotFound` test.
-  If SKUs were ever user-entered, switching the backing dictionary to
-  `StringComparer.OrdinalIgnoreCase` would be the one-line change.
+- **SKU lookup is case-insensitive (reversed).** This was previously case-sensitive, on the
+  argument that SKUs are exact machine identifiers. That has been **deliberately reversed**: the
+  `Sku` value object now upper-cases (`ToUpperInvariant`) on construction, so SKUs are treated as
+  case-insensitive identifiers and entry is forgiving of how a code was typed (`a` matches `A`).
+  Pinned by `Scan_WhenSkuDiffersOnlyByCase_MatchesRule`. **Trade-off, accepted:** case-folding can
+  in theory collapse two genuinely distinct raw SKUs (e.g. `"aB"` vs `"Ab"`) into one key; for this
+  catalog domain that is the right call. Normalisation is centralised in `Sku`, so the policy lives
+  in exactly one place if it ever needs revisiting.
 
 - **Totals accumulate in `checked int`.** Realistic baskets are nowhere near `int.MaxValue`, so
   overflow is not a live risk — but the arithmetic is `checked` so the impossible-in-practice case
