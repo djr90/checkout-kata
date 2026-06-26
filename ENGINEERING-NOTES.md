@@ -69,6 +69,18 @@ kata needs — see the **Proportionality** note at the end for where the line is
   analyzer rules are relaxed for those projects only; `TreatWarningsAsErrors` — including the NU1902
   security audit, which forced the OpenTelemetry (1.16.0) and Aspire SDK (13.4.6) version bumps —
   still holds everywhere.
+- **API error contract is RFC 9457 `ProblemDetails`.** The `Result`/exception split is a *library*
+  decision; turning failures into HTTP responses is the API's job, and it does so uniformly via
+  `AddProblemDetails()` + `UseExceptionHandler()` + `UseStatusCodePages()`. Bad input (unknown/blank
+  SKU, negative quantity) is a **400** validation problem with a per-SKU `errors` map. Anything that
+  throws — a misconfigured catalog, or an absurd basket that trips the `checked`-overflow guard —
+  becomes a **generic 500** `application/problem+json`. **No exception detail leaks to the caller in
+  any environment** (the explicit handler wins over the development exception page, which would
+  otherwise return a stack trace); the exception is logged server-side and the response carries a
+  `traceId` for correlation. `OverflowException` is deliberately a **500**, not a 400 — at realistic
+  magnitudes it is not a client-correctable input but a "should never happen" fault. Pinned by
+  `CheckoutKata.Api.IntegrationTests`, which assert the 500 body contains no stack trace or exception
+  type even when forced into the Development environment.
 
 ## Test strategy
 

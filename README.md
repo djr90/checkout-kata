@@ -112,6 +112,19 @@ To run the API on its own (without Aspire) it listens on `http://localhost:5080`
 dotnet run --project src/CheckoutKata.Api
 ```
 
+**Errors** use RFC 9457 `application/problem+json`. Bad input (unknown/blank SKU, negative
+quantity) returns a `400` validation problem; anything unexpected returns a generic `500` with no
+internal detail (logged server-side, correlated by `traceId`). For example, an unknown SKU:
+
+```json
+{
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": { "Z": ["No pricing rule for this SKU."] },
+  "traceId": "00-..."
+}
+```
+
 ## Testing
 
 ```bash
