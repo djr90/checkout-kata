@@ -20,7 +20,7 @@ dotnet_sort_system_directives_first = true
 csharp_using_directive_placement = outside_namespace:error
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:error
 
-# ADR-035: treat all .NET code-style analyzer warnings as build errors.
+# Treat all .NET code-style analyzer warnings as build errors.
 dotnet_analyzer_diagnostic.category-Style.severity = error
 dotnet_analyzer_diagnostic.category-Design.severity = error
 dotnet_analyzer_diagnostic.category-Usage.severity = error
@@ -28,7 +28,7 @@ dotnet_analyzer_diagnostic.category-Naming.severity = error
 
 # Taste-based rules that are layout/preference only — CSharpier owns layout, and
 # block-vs-expression body / primary-constructor are not correctness concerns.
-# Kept non-blocking deliberately (the ".editorconfig evaluation" ADR-035 calls for).
+# Kept non-blocking deliberately.
 dotnet_diagnostic.IDE0021.severity = silent   # use block body for constructor
 dotnet_diagnostic.IDE0022.severity = silent   # use block body for method
 dotnet_diagnostic.IDE0023.severity = silent   # use block body for conversion operator

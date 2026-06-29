@@ -33,8 +33,8 @@ interface ICheckout
 ```
 
 > In this implementation `Scan` returns a `Result` (Success / NotFound / Invalid)
-> rather than `void`, so a caller can't silently drop an unknown SKU — see ADR-001
-> in the engineering notes.
+> rather than `void`, so a caller can't silently drop an unknown SKU — see the
+> engineering notes for the reasoning.
 
 ## Architecture
 
@@ -96,21 +96,19 @@ Launch everything through the Aspire AppHost (starts the dashboard and the API):
 dotnet run --project src/CheckoutKata.AppHost
 ```
 
-The dashboard prints the `checkout-api` endpoint. Hit the stateless pricing endpoint
-(the whole basket goes in one request):
-
-```bash
-curl -X POST http://localhost:<port>/checkout/total \
-  -H "Content-Type: application/json" \
-  -d '{"items":{"B":2,"A":1}}'
-# {"total":95}
-```
+The dashboard prints the `checkout-api` endpoint. The stateless pricing endpoint takes the
+whole basket in one request (`POST /checkout/total`).
 
 To run the API on its own (without Aspire) it listens on `http://localhost:5080`:
 
 ```bash
 dotnet run --project src/CheckoutKata.Api
 ```
+
+Then exercise it — happy and unhappy paths both — from
+[`CheckoutKata.Api.http`](src/CheckoutKata.Api/CheckoutKata.Api.http) (VS, Rider, or the VS Code
+REST Client: click **Send Request** on any block). A valid basket such as `{"items":{"B":2,"A":1}}`
+returns `{"total":95}`.
 
 **Errors** use RFC 9457 `application/problem+json`. Bad input (unknown/blank SKU, negative
 quantity) returns a `400` validation problem; anything unexpected returns a generic `500` with no
@@ -128,11 +126,11 @@ internal detail (logged server-side, correlated by `traceId`). For example, an u
 ## Testing
 
 ```bash
-dotnet test                                      # unit + property + architecture tests
-dotnet stryker -f stryker-config.Domain.json     # mutation testing, per project
-dotnet stryker -f stryker-config.Application.json
-dotnet csharpier check .                          # formatting
+dotnet test                                      # all four suites (unit + property + architecture + integration)
 ```
+
+This is the quickstart. The **full run/test matrix** — each suite on its own, mutation testing,
+formatting, and what CI gates — lives in [ENGINEERING-NOTES.md](ENGINEERING-NOTES.md#run--test).
 
 # Instructions
 Implement a class or classes that satisfies the problem described above. The solution should include unit tests, and we welcome test first approaches to it.

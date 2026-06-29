@@ -1,0 +1,31 @@
+@host = http://localhost:5080
+
+### Happy path — mixed basket: two Bs (2-for-45) + one A (50). Expect 200, total 95.
+POST {{host}}/checkout/total
+Content-Type: application/json
+
+{ "items": { "B": 2, "A": 1 } }
+
+### Happy path — offer applies twice: six As (two 3-for-130 groups). Expect 200, total 260.
+POST {{host}}/checkout/total
+Content-Type: application/json
+
+{ "items": { "A": 6 } }
+
+### Unknown SKU. Expect 400 application/problem+json with a per-SKU errors map.
+POST {{host}}/checkout/total
+Content-Type: application/json
+
+{ "items": { "Z": 1 } }
+
+### Negative quantity. Expect 400 application/problem+json.
+POST {{host}}/checkout/total
+Content-Type: application/json
+
+{ "items": { "A": -1 } }
+
+### Overflow — 42,949,673 × 50 exceeds int.MaxValue. Expect 500 problem+json, no leaked detail.
+POST {{host}}/checkout/total
+Content-Type: application/json
+
+{ "items": { "A": 42949673 } }
