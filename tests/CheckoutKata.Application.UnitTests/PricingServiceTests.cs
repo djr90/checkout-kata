@@ -78,4 +78,22 @@ public class PricingServiceTests
 
         act.Should().Throw<OverflowException>();
     }
+
+    [Theory]
+    [InlineData(5, 1, 10)]
+    [InlineData(1, 1, 5)]
+    [InlineData(0, 1, 5)]
+    [InlineData(15, 5, 20)]
+    public void CalculateBagCost_WhenBasketHasXItems(int AQty, int BQty, int expectedBagCost)
+    {
+        var sut = new PricingService([
+            new PricingRule("A", int.MaxValue),
+            new PricingRule("B", int.MaxValue),
+        ]);
+        var quantities = new Dictionary<Sku, int> { ["A"] = AQty, ["B"] = BQty };
+
+        var result = sut.CalculateBagCost(quantities);
+
+        result.Should().Be(expectedBagCost);
+    }
 }

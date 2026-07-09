@@ -33,4 +33,18 @@ public sealed class PricingService : IPricingService
 
         return total;
     }
+
+    public int CalculateBagCost(IReadOnlyDictionary<Sku, int> quantities)
+    {
+        var bagCost = 5;
+        var fullBagQty = 5;
+
+        var totalItems = quantities.Sum(d => d.Value);
+
+        var fullBags = totalItems / fullBagQty;
+        var needsExtraBag = totalItems % fullBagQty > 0;
+        var bags = needsExtraBag ? fullBags + 1 : fullBags;
+        var offerTotal = checked(bags * bagCost);
+        return offerTotal;
+    }
 }

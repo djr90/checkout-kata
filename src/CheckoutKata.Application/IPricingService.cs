@@ -17,4 +17,6 @@ public interface IPricingService
     /// (see <see cref="HasRule"/>). Order-independent; overflows throw rather than wrap.
     /// </summary>
     int CalculateTotal(IReadOnlyDictionary<Sku, int> quantities);
+
+    int CalculateBagCost(IReadOnlyDictionary<Sku, int> quantities);
 }
