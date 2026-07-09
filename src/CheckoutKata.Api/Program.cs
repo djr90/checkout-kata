@@ -1,4 +1,5 @@
 using CheckoutKata.Api;
+using CheckoutKata.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
